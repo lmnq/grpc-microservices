@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/lmnq/grpc-microservices/payment/internal/application/domain"
@@ -32,14 +33,14 @@ func NewAdapter(dataSourceURL string) (*Adapter, error) {
 	return &Adapter{db: db}, nil
 }
 
-func (a Adapter) Save(payment *domain.Payment) error {
+func (a Adapter) Save(ctx context.Context, payment *domain.Payment) error {
 	paymentModel := Payment{
 		CustomerID: payment.CustomerID,
 		Status:     payment.Status,
 		OrderID:    payment.OrderID,
 		TotalPrice: payment.TotalPrice,
 	}
-	res := a.db.Create(&paymentModel)
+	res := a.db.WithContext(ctx).Create(&paymentModel)
 	if res.Error == nil {
 		payment.ID = int64(paymentModel.ID)
 	}

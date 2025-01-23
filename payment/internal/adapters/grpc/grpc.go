@@ -12,7 +12,7 @@ import (
 
 func (a Adapter) Create(ctx context.Context, req *pbPayment.CreatePaymentRequest) (*pbPayment.CreatePaymentResponse, error) {
 	newPayment := domain.NewPayment(req.UserId, req.OrderId, req.TotalPrice)
-	result, err := a.api.Charge(newPayment)
+	result, err := a.api.Charge(ctx, newPayment)
 	if err != nil {
 		return nil, status.New(codes.Internal, fmt.Sprintf("failed to charge: %v", err)).Err()
 	}

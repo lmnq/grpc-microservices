@@ -1,7 +1,11 @@
 package ports
 
-import "github.com/lmnq/grpc-microservices/payment/internal/application/domain"
+import (
+	"context"
+
+	"github.com/lmnq/grpc-microservices/payment/internal/application/domain"
+)
 
 type APIPort interface {
-	Charge(payment domain.Payment) (domain.Payment, error)
+	Charge(ctx context.Context, payment domain.Payment) (domain.Payment, error)
 }

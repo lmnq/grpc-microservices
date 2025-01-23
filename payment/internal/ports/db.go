@@ -1,7 +1,11 @@
 package ports
 
-import "github.com/lmnq/grpc-microservices/payment/internal/application/domain"
+import (
+	"context"
+
+	"github.com/lmnq/grpc-microservices/payment/internal/application/domain"
+)
 
 type DBPort interface {
-	Save(payment *domain.Payment) error
+	Save(ctx context.Context, payment *domain.Payment) error
 }
