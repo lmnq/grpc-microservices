@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/lmnq/grpc-microservices/order/internal/application/core/domain"
@@ -39,7 +40,7 @@ func NewAdapter(dataSourceURL string) (*Adapter, error) {
 	return &Adapter{db: db}, nil
 }
 
-func (a Adapter) Get(id string) (domain.Order, error) {
+func (a Adapter) Get(ctx context.Context, id string) (domain.Order, error) {
 	var orderEntity Order
 	res := a.db.First(&orderEntity, id)
 	var orderItems []domain.OrderItem
@@ -60,7 +61,7 @@ func (a Adapter) Get(id string) (domain.Order, error) {
 	return order, res.Error
 }
 
-func (a Adapter) Save(order *domain.Order) error {
+func (a Adapter) Save(ctx context.Context, order *domain.Order) error {
 	var orderItems []OrderItem
 	for _, orderItem := range order.OrderItems {
 		orderItems = append(orderItems, OrderItem{

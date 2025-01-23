@@ -17,7 +17,7 @@ func (a Adapter) Create(ctx context.Context, req *pbOrder.CreateOrderRequest) (*
 		})
 	}
 	newOrder := domain.NewOrder(req.UserId, orderItems)
-	result, err := a.api.PlaceOrder(newOrder)
+	result, err := a.api.PlaceOrder(ctx, newOrder)
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,12 @@
 package ports
 
-import "github.com/lmnq/grpc-microservices/order/internal/application/core/domain"
+import (
+	"context"
+
+	"github.com/lmnq/grpc-microservices/order/internal/application/core/domain"
+)
 
 type DBPort interface {
-	Get(id string) (domain.Order, error)
-	Save(order *domain.Order) error
+	Get(ctx context.Context, id string) (domain.Order, error)
+	Save(ctx context.Context, order *domain.Order) error
 }

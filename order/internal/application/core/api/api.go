@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"strings"
 
 	"github.com/lmnq/grpc-microservices/order/internal/application/core/domain"
@@ -22,12 +23,12 @@ func NewApplication(db ports.DBPort, payment ports.PaymentPort) *Application {
 	}
 }
 
-func (a Application) PlaceOrder(order domain.Order) (domain.Order, error) {
-	err := a.db.Save(&order)
+func (a Application) PlaceOrder(ctx context.Context, order domain.Order) (domain.Order, error) {
+	err := a.db.Save(ctx, &order)
 	if err != nil {
 		return domain.Order{}, err
 	}
-	paymentErr := a.payment.Charge(&order)
+	paymentErr := a.payment.Charge(ctx, &order)
 	if paymentErr != nil {
 		st := status.Convert(paymentErr)
 		var allErrs []string
@@ -43,9 +44,7 @@ func (a Application) PlaceOrder(order domain.Order) (domain.Order, error) {
 			Field:       "payment",
 			Description: strings.Join(allErrs, "\n"),
 		}
-		badReq := &errdetails.BadRequest{
-			// FieldViolations: []*errdetails.BadRequest_FieldViolation{fieldErr},
-		}
+		badReq := &errdetails.BadRequest{}
 		badReq.FieldViolations = append(badReq.FieldViolations, fieldErr)
 		orderStatus := status.New(codes.InvalidArgument, "order creation failed")
 		statusWithDetails, _ := orderStatus.WithDetails(badReq)
