@@ -40,9 +40,9 @@ func NewAdapter(dataSourceURL string) (*Adapter, error) {
 	return &Adapter{db: db}, nil
 }
 
-func (a Adapter) Get(ctx context.Context, id string) (domain.Order, error) {
+func (a Adapter) Get(ctx context.Context, id int64) (domain.Order, error) {
 	var orderEntity Order
-	res := a.db.First(&orderEntity, id)
+	res := a.db.WithContext(ctx).Preload("OrderItems").First(&orderEntity, id)
 	var orderItems []domain.OrderItem
 	for _, orderItem := range orderEntity.OrderItems {
 		orderItems = append(orderItems, domain.OrderItem{

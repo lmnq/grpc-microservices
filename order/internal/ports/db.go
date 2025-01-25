@@ -7,6 +7,6 @@ import (
 )
 
 type DBPort interface {
-	Get(ctx context.Context, id string) (domain.Order, error)
+	Get(ctx context.Context, id int64) (domain.Order, error)
 	Save(ctx context.Context, order *domain.Order) error
 }

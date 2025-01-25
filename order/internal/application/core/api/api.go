@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"strings"
 
 	"github.com/lmnq/grpc-microservices/order/internal/application/core/domain"
 	"github.com/lmnq/grpc-microservices/order/internal/ports"
@@ -30,19 +29,24 @@ func (a Application) PlaceOrder(ctx context.Context, order domain.Order) (domain
 	}
 	paymentErr := a.payment.Charge(ctx, &order)
 	if paymentErr != nil {
+		// st := status.Convert(paymentErr)
+		// var allErrs []string
+		// for _, errDetail := range st.Details() {
+		// 	switch t := errDetail.(type) {
+		// 	case *errdetails.BadRequest:
+		// 		for _, violation := range t.GetFieldViolations() {
+		// 			allErrs = append(allErrs, violation.Description)
+		// 		}
+		// 	}
+		// }
+		// fieldErr := &errdetails.BadRequest_FieldViolation{
+		// 	Field:       "payment",
+		// 	Description: strings.Join(allErrs, "\n"),
+		// }
 		st := status.Convert(paymentErr)
-		var allErrs []string
-		for _, errDetail := range st.Details() {
-			switch t := errDetail.(type) {
-			case *errdetails.BadRequest:
-				for _, violation := range t.GetFieldViolations() {
-					allErrs = append(allErrs, violation.Description)
-				}
-			}
-		}
 		fieldErr := &errdetails.BadRequest_FieldViolation{
 			Field:       "payment",
-			Description: strings.Join(allErrs, "\n"),
+			Description: st.Message(),
 		}
 		badReq := &errdetails.BadRequest{}
 		badReq.FieldViolations = append(badReq.FieldViolations, fieldErr)
