@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 20s
+      interval: 5s
+      retries: 10
+  
+  payment:
+    depends_on:
+      mysql:
+        condition: service_healthy
+    build:
+      context: ../../payment
+      dockerfile: Dockerfile
+    environment:
+      - APPLICATION_PORT=8081
+      - ENV=dev
+      - DATA_SOURCE_URL=root:password@tcp(mysql:3306)/payment?charset=utf8mb4&parseTime=true&loc=Local&tls=skip-verify
+  
+  order:
+    depends_on:
+      mysql:
+        condition: service_healthy
+      # payment:
+      #   condition: service_started
+    build:
+      context: ../../order
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - APPLICATION_PORT=8080
+      - ENV=dev
+      - DATA_SOURCE_URL=root:password@tcp(mysql:3306)/order?charset=utf8mb4&parseTime=true&loc=Local&tls=skip-verify
+      - PAYMENT_SERVICE_URL=payment:8081
